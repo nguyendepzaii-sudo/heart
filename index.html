@@ -50,9 +50,9 @@
     <div class="center-text">Love You</div>
     <canvas id="heartCanvas"></canvas>
     
-    <!-- Tự động kết nối tới file nhạc của bạn trên GitHub -->
+    <!-- Gọi trực tiếp file music.mp3 đã đổi tên -->
     <audio id="bgMusic" loop autoplay>
-        <source src="SUNi - Khong Sao Ma, Em Day Roi (Feat. Lou Hoang) - MV Official.mp3" type="audio/mpeg">
+        <source src="music.mp3" type="audio/mpeg">
     </audio>
 
     <button class="music-btn" onclick="toggleMusic()">🎵 Bật/Tắt Nhạc</button>
@@ -70,10 +70,17 @@
         window.addEventListener('resize', resize);
 
         function toggleMusic() {
-            if (audio.paused) { audio.play(); } else { audio.pause(); }
+            if (audio.paused) { 
+                audio.play(); 
+            } else { 
+                audio.pause(); 
+            }
         }
-        // Thử tự động phát nhạc khi chạm màn hình
-        window.addEventListener('click', () => { audio.play().catch(()=>{}); }, { once: true });
+
+        // Tự động phát nhạc ngay khi chạm/click vào bất kỳ đâu trên trang
+        window.addEventListener('click', () => { 
+            audio.play().catch(() => {}); 
+        }, { once: true });
 
         const colors = ['#4682B4', '#1E90FF', '#00BFFF', '#6495ED', '#4169E1'];
         const particles = [];
@@ -89,7 +96,7 @@
             const t = Math.random() * Math.PI * 2;
             const pos = heartEquation(t);
             const scale = Math.min(canvas.width, canvas.height) / 40;
-            const r = Math.random() < 0.4 ? 1 : Math.random() * 0.85; // Bao gồm cả viền và ruột
+            const r = Math.random() < 0.4 ? 1 : Math.random() * 0.85;
             
             particles.push({
                 baseX: pos.x * scale * r,
@@ -102,14 +109,12 @@
             });
         }
 
-        let step = 0;
         function animate() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
-            step += 0.05;
 
             particles.forEach(p => {
                 p.flicker += p.speed;
