@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yêu chị <3</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            position: absolute;
+        }
+        .text {
+            position: absolute;
+            color: #fff;
+            font-family: 'Georgia', serif;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
+            animation: pulse 1.5s infinite alternate;
+        }
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 0.8; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="text">Love You</div>
+    <canvas id="heart"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('heart');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function heartX(t) {
+            return 16 * Math.pow(Math.sin(t), 3);
+        }
+        function heartY(t) {
+            return -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+        }
+
+        const points = [];
+        for (let i = 0; i < Math.PI * 2; i += 0.05) {
+            points.push({
+                x: heartX(i) * 12 + canvas.width / 2,
+                y: heartY(i) * 12 + canvas.height / 2
+            });
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#1E90FF';
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x + (Math.random()-0.5)*5, p.y + (Math.random()-0.5)*5, 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+    </script>
+</body>
+</html>
+
