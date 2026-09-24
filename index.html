@@ -3,73 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yêu chị <3</title>
+    <title>Love You <3</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            margin: 0;
             background-color: #000;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-        }
-        canvas {
-            position: absolute;
-        }
-        .text {
-            position: absolute;
-            color: #fff;
             font-family: 'Georgia', serif;
-            font-size: 32px;
+        }
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
+        .center-text {
+            position: absolute;
+            z-index: 2;
+            color: #fff;
+            font-size: 42px;
             font-weight: bold;
-            text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f;
-            animation: pulse 1.5s infinite alternate;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 0 0 10px #00bfff, 0 0 20px #00bfff, 0 0 40px #1e90ff;
+            animation: pulse 1.2s infinite alternate ease-in-out;
         }
         @keyframes pulse {
-            from { transform: scale(1); opacity: 0.8; }
-            to { transform: scale(1.1); opacity: 1; }
+            0% { transform: scale(0.95); opacity: 0.85; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+        .music-btn {
+            position: fixed;
+            bottom: 20px;
+            z-index: 10;
+            padding: 10px 20px;
+            background: rgba(30, 144, 255, 0.4);
+            color: #fff;
+            border: 1px solid #00bfff;
+            border-radius: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="text">Love You</div>
-    <canvas id="heart"></canvas>
+    <div class="center-text">Love You</div>
+    <canvas id="heartCanvas"></canvas>
     
+    <!-- Tự động kết nối tới file nhạc của bạn trên GitHub -->
+    <audio id="bgMusic" loop autoplay>
+        <source src="SUNi - Khong Sao Ma, Em Day Roi (Feat. Lou Hoang) - MV Official.mp3" type="audio/mpeg">
+    </audio>
+
+    <button class="music-btn" onclick="toggleMusic()">🎵 Bật/Tắt Nhạc</button>
+
     <script>
-        const canvas = document.getElementById('heart');
+        const canvas = document.getElementById('heartCanvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const audio = document.getElementById('bgMusic');
 
-        function heartX(t) {
-            return 16 * Math.pow(Math.sin(t), 3);
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
-        function heartY(t) {
-            return -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+        resize();
+        window.addEventListener('resize', resize);
+
+        function toggleMusic() {
+            if (audio.paused) { audio.play(); } else { audio.pause(); }
+        }
+        // Thử tự động phát nhạc khi chạm màn hình
+        window.addEventListener('click', () => { audio.play().catch(()=>{}); }, { once: true });
+
+        const colors = ['#4682B4', '#1E90FF', '#00BFFF', '#6495ED', '#4169E1'];
+        const particles = [];
+        const numParticles = 350;
+
+        function heartEquation(t) {
+            const x = 16 * Math.pow(Math.sin(t), 3);
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+            return { x, y };
         }
 
-        const points = [];
-        for (let i = 0; i < Math.PI * 2; i += 0.05) {
-            points.push({
-                x: heartX(i) * 12 + canvas.width / 2,
-                y: heartY(i) * 12 + canvas.height / 2
+        for (let i = 0; i < numParticles; i++) {
+            const t = Math.random() * Math.PI * 2;
+            const pos = heartEquation(t);
+            const scale = Math.min(canvas.width, canvas.height) / 40;
+            const r = Math.random() < 0.4 ? 1 : Math.random() * 0.85; // Bao gồm cả viền và ruột
+            
+            particles.push({
+                baseX: pos.x * scale * r,
+                baseY: pos.y * scale * r,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                size: Math.random() * 2.5 + 1,
+                alpha: Math.random(),
+                speed: Math.random() * 0.03 + 0.01,
+                flicker: Math.random() * Math.PI * 2
             });
         }
 
-        function draw() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        let step = 0;
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#1E90FF';
-            points.forEach(p => {
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            step += 0.05;
+
+            particles.forEach(p => {
+                p.flicker += p.speed;
+                const currentAlpha = Math.abs(Math.sin(p.flicker));
+                
+                ctx.save();
+                ctx.globalAlpha = currentAlpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = p.color;
+                
                 ctx.beginPath();
-                ctx.arc(p.x + (Math.random()-0.5)*5, p.y + (Math.random()-0.5)*5, 2, 0, Math.PI * 2);
+                ctx.arc(centerX + p.baseX, centerY + p.baseY, p.size, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.restore();
             });
-            requestAnimationFrame(draw);
+
+            requestAnimationFrame(animate);
         }
-        draw();
+        animate();
     </script>
 </body>
 </html>
-
